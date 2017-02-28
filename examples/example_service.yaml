@@ -1,0 +1,11 @@
+apiVersion: 1
+type: anycast
+meta:
+  name: example_service
+spec:
+  asNumber: 65342
+  ip: 127.6.6.6
+  ip6: ::6:6:6
+  healthCheck: "/bin/true"
+  bgpPeers:
+    - localhost
