@@ -25,7 +25,7 @@ func NewHealthCheck(logger lib.Logger, cfg HealthCheckConfig) *HealthCheck {
 	return &HealthCheck{Config: cfg}
 }
 
-func (hc *HealthCheck) RunCheckRoutine() {
+func (hc *HealthCheck) CheckRoutine() {
 	var (
 		checkStatus bool
 	)

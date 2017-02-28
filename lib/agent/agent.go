@@ -148,7 +148,8 @@ func (aa *AnycastAgent) RunAnycastService() {
 
 	stateChan = make(chan bool, 1)
 
-	go aa.healthCheck.RunCheckRoutine()
+	go aa.healthCheck.CheckRoutine()
+	go aa.bgpService.ServerRoutine()
 
 	for {
 		select {
