@@ -1,0 +1,7 @@
+apiVersion: 1
+type: bgpPeer
+meta:
+  name: laptop
+spec:
+  asNumber: 65342
+  IP: 10.0.4.1
