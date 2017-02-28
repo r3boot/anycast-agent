@@ -3,7 +3,7 @@ type: anycast
 meta:
   name: example_service
 spec:
-  asNumber: 65342
+  asnum: 65342
   ip: 127.6.6.6
   healthCheck: "/bin/true"
   bgpPeers:

@@ -138,6 +138,12 @@ func (ec *EtcdClient) GetObject(objType, name string) (interface{}, error) {
 				Spec: AnycastSpecObject{},
 			}
 
+			if response, err := ec.Get(path + "/asnum"); err == nil {
+				if object.Spec.AsNumber, err = strconv.Atoi(response); err != nil {
+					return nil, err
+				}
+			}
+
 			if response, err := ec.Get(path + "/ip"); err == nil {
 				object.Spec.IP = response
 			}
