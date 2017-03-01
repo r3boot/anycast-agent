@@ -101,7 +101,7 @@ func (bgp *BGP) addv6Neighbor(ipaddr string) {
 	Logger.Debug("bgp: Adding IPv6 neighbor " + ipaddr)
 	bgp.cmdToPeer <- bgp2go.BGPProcessMsg{
 		Cmnd: "AddNeighbour",
-		Data: ipaddr + " inet6",
+		Data: "[" + ipaddr + "] inet6",
 	}
 }
 
@@ -125,7 +125,7 @@ func (bgp *BGP) removev6Neighbor(ipaddr string) {
 	Logger.Debug("bgp: Removing IPv6 neighbor " + ipaddr)
 	bgp.cmdToPeer <- bgp2go.BGPProcessMsg{
 		Cmnd: "RemoveNeighbour",
-		Data: ipaddr + " inet6",
+		Data: "[" + ipaddr + "] inet6",
 	}
 }
 
