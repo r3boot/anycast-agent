@@ -44,7 +44,7 @@ func main() {
 	if *etcdEndpoints == _d_etcdEndpoint {
 		for _, kv := range os.Environ() {
 			pair := strings.Split(kv, "=")
-			if pair[0] == "ETCD_ENDPOINT" {
+			if pair[0] == "ETCD_ENDPOINTS" {
 				*etcdEndpoints = pair[1]
 			}
 		}
