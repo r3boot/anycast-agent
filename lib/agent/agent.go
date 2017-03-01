@@ -138,7 +138,6 @@ func (aa *AnycastAgent) RunAnycastService() {
 		lastResults []bool
 		health      bool
 		stateChan   chan bool
-		err         error
 	)
 
 	numItems := aa.healthCheck.Config.MaxRetries
