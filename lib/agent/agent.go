@@ -138,6 +138,7 @@ func (aa *AnycastAgent) RunAnycastService() {
 		lastResults []bool
 		health      bool
 		stateChan   chan bool
+		err         error
 	)
 
 	numItems := aa.healthCheck.Config.MaxRetries
@@ -187,18 +188,30 @@ func (aa *AnycastAgent) RunAnycastService() {
 				if curState {
 					aa.Logger.Debug("AnycastAgent: State changed to UP")
 					if aa.IP != "" {
+						if err = lib.AddAnycastAddress(aa.IP); err != nil {
+							aa.Logger.Warn("AnycastAgent: Failed to add ipv4 address: " + err.Error())
+						}
 						aa.bgpService.AddRoute(aa.IP)
 					}
 					if aa.IP6 != "" {
+						if err = lib.AddAnycastAddress(aa.IP6); err != nil {
+							aa.Logger.Warn("AnycastAgent: Failed to add ipv6 address: " + err.Error())
+						}
 						aa.bgpService.AddRoute(aa.IP6)
 					}
 				} else {
 					aa.Logger.Debug("AnycastAgent: State changed to DOWN")
 					if aa.IP != "" {
 						aa.bgpService.RemoveRoute(aa.IP)
+						if err = lib.RemoveAnycastAddress(aa.IP); err != nil {
+							aa.Logger.Warn("AnycastAgent: Failed to remove ipv4 address: " + err.Error())
+						}
 					}
 					if aa.IP6 != "" {
 						aa.bgpService.RemoveRoute(aa.IP6)
+						if err = lib.RemoveAnycastAddress(aa.IP6); err != nil {
+							aa.Logger.Warn("AnycastAgent: Failed to remove ipv6 address: " + err.Error())
+						}
 					}
 				}
 			}
