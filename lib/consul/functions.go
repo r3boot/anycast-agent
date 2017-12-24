@@ -26,6 +26,10 @@ func (c *Consul) Connect() error {
 }
 
 func (c *Consul) Set(key, value string) error {
+	if strings.HasPrefix(key, "/") {
+		key = key[1:]
+	}
+
 	data := &api.KVPair{Key: key, Value: []byte(value)}
 	_, err := c.kv.Put(data, nil)
 	if err != nil {
