@@ -52,7 +52,7 @@ func (aa *AnycastAgent) Initialize(endpoint string) error {
 	)
 
 	if Consul, err = consul.NewConsul(endpoint); err != nil {
-		return fmt.Errorf("AnycastAngent.Initialize: %v", err)
+		return fmt.Errorf("AnycastAgeent.Initialize: %v", err)
 	}
 
 	object, err := Consul.GetObject(structs.TypeAnycast, aa.Name)

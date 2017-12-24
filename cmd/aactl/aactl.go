@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	_d_default_consulEndpoint string = "http://localhost:8500"
+	_d_default_consulEndpoint string = "localhost:8500"
 )
 
 func main() {
