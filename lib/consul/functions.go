@@ -59,7 +59,7 @@ func (c *Consul) ApplyObject(object interface{}) error {
 	case "BgpPeerObject":
 		{
 			bgpPeer := object.(structs.BgpPeerObject)
-			path := c.Prefix + "/peers/" + bgpPeer.Meta.Name
+			path := c.Prefix + "/anycast/peers/" + bgpPeer.Meta.Name
 
 			if err = c.Set(path+"/asnum", strconv.Itoa(bgpPeer.Spec.AsNumber)); err != nil {
 				return err
@@ -99,7 +99,7 @@ func (c *Consul) ApplyObject(object interface{}) error {
 			}
 
 			peers := strings.Join(anycast.Spec.Peers, ",")
-			if err = c.Set(path+"/peers", peers); err != nil {
+			if err = c.Set(path+"/anycast/peers", peers); err != nil {
 				return err
 			}
 		}
@@ -116,7 +116,7 @@ func (c *Consul) GetObject(objType, name string) (interface{}, error) {
 	switch objType {
 	case structs.TypeBgpPeer:
 		{
-			path := c.Prefix + "/peers/" + name
+			path := c.Prefix + "/anycast/peers/" + name
 
 			object := structs.BgpPeerObject{
 				ApiVersion: 1,
