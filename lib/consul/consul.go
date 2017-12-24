@@ -4,7 +4,7 @@ import "fmt"
 
 func NewConsul(uri string) (*Consul, error) {
 	c := &Consul{
-		Prefix: "services/anycast-agent",
+		Prefix: "services",
 		uri:    uri,
 	}
 

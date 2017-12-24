@@ -72,7 +72,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Printf("Consul.Prefix: %v", Consul.Prefix)
+	fmt.Printf("Consul.Prefix: %v\n", Consul.Prefix)
 
 	if *apply != "" {
 		object, err := structs.LoadFromYaml(*apply)
