@@ -8,6 +8,8 @@ import (
 	"reflect"
 	"strings"
 
+	"path/filepath"
+
 	"github.com/hashicorp/consul/api"
 	"github.com/r3boot/anycast-agent/lib/structs"
 )
@@ -42,6 +44,7 @@ func (c *Consul) Set(key, value string) error {
 }
 
 func (c *Consul) Get(key string) (string, error) {
+	fmt.Printf("key: %v\n", key)
 	data, _, err := c.kv.Get(key, nil)
 	if err != nil {
 		return "", fmt.Errorf("Consul.Get: kv.Get: %v", err)
@@ -56,9 +59,28 @@ func (c *Consul) Ls(path string) ([]string, error) {
 		return nil, fmt.Errorf("Consul.Ls: kv.List: %v", err)
 	}
 
-	allEntries := []string{}
+	allKeys := []string{}
 	for _, entry := range data {
-		allEntries = append(allEntries, string(entry.Value))
+		if entry == nil {
+			continue
+		}
+		allKeys = append(allKeys, string(entry.Key))
+	}
+
+	allEntries := []string{}
+	for _, entry := range allKeys {
+		key := filepath.Base(filepath.Dir(entry))
+		hasKey := false
+		for _, k := range allEntries {
+			if key == k {
+				hasKey = true
+				break
+			}
+		}
+
+		if !hasKey {
+			allEntries = append(allEntries, key)
+		}
 	}
 
 	return allEntries, nil
