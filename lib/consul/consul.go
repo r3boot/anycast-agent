@@ -13,7 +13,7 @@ func NewConsul(uri string) (*Consul, error) {
 	}
 
 	c := &Consul{
-		Prefix: "services",
+		Prefix: "anycast",
 		uri:    uri,
 	}
 
