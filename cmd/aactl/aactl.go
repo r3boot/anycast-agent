@@ -7,28 +7,29 @@ import (
 	"strings"
 
 	"github.com/r3boot/anycast-agent/lib"
+	"github.com/r3boot/anycast-agent/lib/consul"
+	"github.com/r3boot/anycast-agent/lib/structs"
 )
 
 const (
-	_d_default_etcdEndpoint string = "http://localhost:2379"
+	_d_default_consulEndpoint string = "http://localhost:8500"
 )
 
 func main() {
 	var (
-		etcdEndpoints *string
-		apply         *string
-		get           *string
-		delete        *string
-		etcd          *lib.EtcdClient
-		endpoints     []string
-		err           error
+		consulEndpoint *string
+		apply          *string
+		get            *string
+		delete         *string
+		Consul         *consul.Consul
+		err            error
 	)
 
 	// Global options
-	etcdEndpoints = flag.String(
+	consulEndpoint = flag.String(
 		"etcd",
-		_d_default_etcdEndpoint,
-		"Connect to etcd on these comma-separated urls",
+		_d_default_consulEndpoint,
+		"Connect to consul on this url",
 	)
 
 	apply = flag.String(
@@ -56,30 +57,28 @@ func main() {
 		os.Exit(1)
 	}
 
-	if *etcdEndpoints == _d_default_etcdEndpoint {
+	if *consulEndpoint == _d_default_consulEndpoint {
 		for _, kv := range os.Environ() {
 			pair := strings.Split(kv, "=")
-			if pair[0] == "ETCD_ENDPOINTS" {
-				*etcdEndpoints = pair[1]
+			if pair[0] == "CONSUL_HTTP_ADDR" {
+				*consulEndpoint = pair[1]
 			}
 		}
 	}
 
-	endpoints = strings.Split(*etcdEndpoints, ",")
-
-	etcd, err = lib.NewEtcdClient(endpoints, "/am/v1")
+	Consul, err = consul.NewConsul(*consulEndpoint)
 	if err != nil {
 		fmt.Println("newclient: " + err.Error())
 		os.Exit(1)
 	}
 
 	if *apply != "" {
-		object, err := lib.LoadFromYaml(*apply)
+		object, err := structs.LoadFromYaml(*apply)
 		if err != nil {
 			fmt.Print("apply: " + err.Error())
 			os.Exit(1)
 		}
-		if err = etcd.ApplyObject(object); err != nil {
+		if err = Consul.ApplyObject(object); err != nil {
 			fmt.Print("etcd.ApplyObject: " + err.Error())
 		}
 	}
@@ -93,20 +92,20 @@ func main() {
 			name = tokens[1]
 		}
 
-		prefix := etcd.Prefix
+		prefix := Consul.Prefix
 		switch objType {
-		case lib.TypeBgpPeer:
+		case structs.TypeBgpPeer:
 			{
 				prefix = prefix + "/peers"
 			}
-		case lib.TypeAnycast:
+		case structs.TypeAnycast:
 			{
 				prefix = prefix + "/anycast"
 			}
 		}
 
 		if name != "" {
-			object, err := etcd.GetObject(objType, name)
+			object, err := Consul.GetObject(objType, name)
 			if err != nil {
 				fmt.Println("get: " + err.Error())
 				os.Exit(1)
@@ -120,7 +119,7 @@ func main() {
 
 			fmt.Print(string(output))
 		} else {
-			all_objects, err := etcd.GetAllObjects(objType, prefix)
+			all_objects, err := Consul.GetAllObjects(objType, prefix)
 			if err != nil {
 				fmt.Println("get: " + err.Error())
 				os.Exit(1)
@@ -136,48 +135,50 @@ func main() {
 		}
 	}
 
-	if *delete != "" {
-		objType := *delete
-		name := ""
-		if strings.Contains(*delete, ":") {
-			tokens := strings.Split(*delete, ":")
-			objType = tokens[0]
-			name = tokens[1]
+	/*
+		if *delete != "" {
+			objType := *delete
+			name := ""
+			if strings.Contains(*delete, ":") {
+				tokens := strings.Split(*delete, ":")
+				objType = tokens[0]
+				name = tokens[1]
+			}
+
+			prefix := Consul.Prefix
+			switch objType {
+			case structs.TypeBgpPeer:
+				{
+					prefix = prefix + "/peers"
+				}
+			case structs.TypeAnycast:
+				{
+					prefix = prefix + "/anycast"
+				}
+			}
+
+			var items []string
+
+			if name != "" {
+				items = append(items, prefix+"/"+name)
+			} else {
+				all_items, err := Consul.Ls(prefix)
+				if err != nil {
+					fmt.Println("delete: " + err.Error())
+					os.Exit(1)
+				}
+				for _, item := range all_items {
+					items = append(items, prefix+"/"+item)
+				}
+			}
+
+			for _, item := range items {
+				if err = etcd.Rm(item); err != nil {
+					fmt.Println("delete: " + err.Error())
+					os.Exit(1)
+				}
+			}
+
 		}
-
-		prefix := etcd.Prefix
-		switch objType {
-		case lib.TypeBgpPeer:
-			{
-				prefix = prefix + "/peers"
-			}
-		case lib.TypeAnycast:
-			{
-				prefix = prefix + "/anycast"
-			}
-		}
-
-		var items []string
-
-		if name != "" {
-			items = append(items, prefix+"/"+name)
-		} else {
-			all_items, err := etcd.Ls(prefix)
-			if err != nil {
-				fmt.Println("delete: " + err.Error())
-				os.Exit(1)
-			}
-			for _, item := range all_items {
-				items = append(items, prefix+"/"+item)
-			}
-		}
-
-		for _, item := range items {
-			if err = etcd.Rm(item); err != nil {
-				fmt.Println("delete: " + err.Error())
-				os.Exit(1)
-			}
-		}
-
-	}
+	*/
 }

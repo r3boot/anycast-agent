@@ -1,10 +1,12 @@
-package lib
+package structs
 
 import (
 	"errors"
-	"gopkg.in/yaml.v2"
+	"io/ioutil"
 	"net"
 	"strconv"
+
+	"gopkg.in/yaml.v2"
 )
 
 func ValidateBgpPeerYaml(bgpPeer BgpPeerObject) error {
@@ -50,7 +52,7 @@ func LoadFromYaml(fname string) (interface{}, error) {
 		err  error
 	)
 
-	if data, err = ReadFile(fname); err != nil {
+	if data, err = ioutil.ReadFile(fname); err != nil {
 		err = errors.New("LoadFromYaml: " + err.Error())
 		return nil, err
 	}

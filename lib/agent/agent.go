@@ -2,10 +2,14 @@ package agent
 
 import (
 	"errors"
+	"fmt"
+	"time"
+
 	"github.com/r3boot/anycast-agent/lib"
 	"github.com/r3boot/anycast-agent/lib/bgp"
+	"github.com/r3boot/anycast-agent/lib/consul"
 	"github.com/r3boot/anycast-agent/lib/healthcheck"
-	"time"
+	"github.com/r3boot/anycast-agent/lib/structs"
 )
 
 type AnycastAgent struct {
@@ -21,7 +25,7 @@ type AnycastAgent struct {
 	healthCheck *healthcheck.HealthCheck
 }
 
-func NewAnycastAgent(endpoints []string, profile string) (*AnycastAgent, error) {
+func NewAnycastAgent(endpoint string, profile string) (*AnycastAgent, error) {
 	var (
 		agent *AnycastAgent
 		err   error
@@ -32,7 +36,7 @@ func NewAnycastAgent(endpoints []string, profile string) (*AnycastAgent, error) 
 		Logger: lib.NewLogger(true),
 	}
 
-	if err = agent.Initialize(endpoints); err != nil {
+	if err = agent.Initialize(endpoint); err != nil {
 		err = errors.New("NewAnycastAgent: " + err.Error())
 		return nil, err
 	}
@@ -40,27 +44,26 @@ func NewAnycastAgent(endpoints []string, profile string) (*AnycastAgent, error) 
 	return agent, nil
 }
 
-func (aa *AnycastAgent) Initialize(endpoints []string) error {
+func (aa *AnycastAgent) Initialize(endpoint string) error {
 	var (
-		etcd         *lib.EtcdClient
+		Consul       *consul.Consul
 		hcResultChan chan bool
 		err          error
 	)
 
-	if etcd, err = lib.NewEtcdClient(endpoints, "/am/v1"); err != nil {
-		err = errors.New("Initialize: " + err.Error())
-		return err
+	if Consul, err = consul.NewConsul(endpoint); err != nil {
+		return fmt.Errorf("AnycastAngent.Initialize: %v", err)
 	}
 
-	object, err := etcd.GetObject(lib.TypeAnycast, aa.Name)
+	object, err := Consul.GetObject(structs.TypeAnycast, aa.Name)
 	if err != nil {
 		err = errors.New("Initialize: " + err.Error())
 		return err
 	}
 
-	aa.LocalAs = object.(lib.AnycastObject).Spec.AsNumber
-	aa.IP = object.(lib.AnycastObject).Spec.IP
-	aa.IP6 = object.(lib.AnycastObject).Spec.IP6
+	aa.LocalAs = object.(structs.AnycastObject).Spec.AsNumber
+	aa.IP = object.(structs.AnycastObject).Spec.IP
+	aa.IP6 = object.(structs.AnycastObject).Spec.IP6
 
 	if aa.NextHopIP, err = lib.GetNextHopAddress(lib.AF_INET); err != nil {
 		aa.Logger.Warn("AnycastAgent: No ipv4 next-hop address found: " + err.Error())
@@ -70,13 +73,13 @@ func (aa *AnycastAgent) Initialize(endpoints []string) error {
 		aa.Logger.Warn("AnycastAgent: No ipv6 next-hop address found: " + err.Error())
 	}
 
-	all_objects, err := etcd.GetAllObjects(lib.TypeBgpPeer, etcd.Prefix+"/peers")
+	all_objects, err := Consul.GetAllObjects(structs.TypeBgpPeer, Consul.Prefix+"/peers")
 	if err != nil {
 		aa.Logger.Error("AnycastAgent: Failed to retrieve bgp peers: " + err.Error())
 	}
 
 	for _, peer := range all_objects {
-		spec := peer.(lib.BgpPeerObject).Spec
+		spec := peer.(structs.BgpPeerObject).Spec
 		if spec.IP != "" {
 			aa.BgpPeers = append(aa.BgpPeers, spec.IP)
 		}
@@ -87,7 +90,7 @@ func (aa *AnycastAgent) Initialize(endpoints []string) error {
 
 	hcResultChan = make(chan bool, 10)
 	aa.healthCheck = healthcheck.NewHealthCheck(aa.Logger, healthcheck.HealthCheckConfig{
-		Command:     object.(lib.AnycastObject).Spec.HealthCheck,
+		Command:     object.(structs.AnycastObject).Spec.HealthCheck,
 		Interval:    3 * time.Second,
 		InitDamping: 2,
 		MaxRetries:  5,

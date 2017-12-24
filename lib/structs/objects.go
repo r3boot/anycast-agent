@@ -1,4 +1,4 @@
-package lib
+package structs
 
 const (
 	TypeBgpPeer string = "bgpPeer"
@@ -10,7 +10,7 @@ type objectTypeExtractor struct {
 	Type       string `yaml:"type"`
 }
 
-type bgpPeerMetaObject struct {
+type BgpPeerMetaObject struct {
 	Name string `yaml:"name"`
 }
 
@@ -23,11 +23,11 @@ type BgpPeerSpecObject struct {
 type BgpPeerObject struct {
 	ApiVersion int               `yaml:"apiVersion"`
 	Type       string            `yaml:"type"`
-	Meta       bgpPeerMetaObject `yaml:"meta"`
+	Meta       BgpPeerMetaObject `yaml:"meta"`
 	Spec       BgpPeerSpecObject `yaml:"spec"`
 }
 
-type anycastMetaObject struct {
+type AnycastMetaObject struct {
 	Name string `yaml:"name"`
 }
 
@@ -42,6 +42,6 @@ type AnycastSpecObject struct {
 type AnycastObject struct {
 	ApiVersion int               `yaml:"apiVersion"`
 	Type       string            `yaml:"type"`
-	Meta       anycastMetaObject `yaml:"meta"`
+	Meta       AnycastMetaObject `yaml:"meta"`
 	Spec       AnycastSpecObject `yaml:"spec"`
 }
