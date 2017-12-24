@@ -27,7 +27,7 @@ func main() {
 
 	// Global options
 	consulEndpoint = flag.String(
-		"etcd",
+		"consul",
 		_d_default_consulEndpoint,
 		"Connect to consul on this url",
 	)
