@@ -58,9 +58,7 @@ func (c *Consul) Ls(path string) ([]string, error) {
 
 	allEntries := []string{}
 	for _, entry := range data {
-		tokens := strings.Split(string(entry.Value), "/")
-		key := tokens[len(tokens)]
-		allEntries = append(allEntries, key)
+		allEntries = append(allEntries, string(entry.Value))
 	}
 
 	return allEntries, nil
