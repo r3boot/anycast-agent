@@ -58,7 +58,7 @@ func (c *Consul) Ls(path string) ([]string, error) {
 
 	allEntries := []string{}
 	for _, entry := range data {
-		tokens := strings.Split(entry.Value, "/")
+		tokens := strings.Split(string(entry.Value), "/")
 		key := tokens[len(tokens)]
 		allEntries = append(allEntries, key)
 	}
@@ -215,7 +215,6 @@ func (c *Consul) GetAllObjects(objType, path string) ([]interface{}, error) {
 		diritems []string
 		err      error
 	)
-
 
 	if diritems, err = c.Ls(path); err != nil {
 		err = errors.New("GetAllObjects: c.Ls() failed: " + err.Error())
