@@ -51,7 +51,7 @@ func (c *Consul) Get(key string) (string, error) {
 }
 
 func (c *Consul) Ls(path string) ([]string, error) {
-	data, _, err := c.kv.List(path)
+	data, _, err := c.kv.List(path, &api.QueryOptions{})
 	if err != nil {
 		return nil, fmt.Errorf("Consul.Ls: kv.List: %v", err)
 	}
