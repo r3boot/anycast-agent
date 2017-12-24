@@ -44,7 +44,6 @@ func (c *Consul) Set(key, value string) error {
 }
 
 func (c *Consul) Get(key string) (string, error) {
-	fmt.Printf("key: %v\n", key)
 	data, _, err := c.kv.Get(key, nil)
 	if err != nil {
 		return "", fmt.Errorf("Consul.Get: kv.Get: %v", err)
