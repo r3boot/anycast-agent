@@ -30,6 +30,8 @@ func (c *Consul) Set(key, value string) error {
 		key = key[1:]
 	}
 
+	fmt.Printf("Consul.Set: key=%s; value: %s", key, value)
+
 	data := &api.KVPair{Key: key, Value: []byte(value)}
 	_, err := c.kv.Put(data, nil)
 	if err != nil {
