@@ -85,6 +85,7 @@ func (bgp *BGP) ServerRoutine() {
 
 	time.Sleep(1 * time.Second)
 	for _, bgpPeer = range bgp.peers {
+		Logger.Debug("bgp: Adding bgp peer %s", bgpPeer)
 		bgp.AddNeighbor(bgpPeer)
 	}
 }
