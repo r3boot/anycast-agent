@@ -50,6 +50,22 @@ func (c *Consul) Get(key string) (string, error) {
 	return string(data.Value), nil
 }
 
+func (c *Consul) Ls(path string) ([]string, error) {
+	data, _, err := c.kv.List(path)
+	if err != nil {
+		return nil, fmt.Errorf("Consul.Ls: kv.List: %v", err)
+	}
+
+	allEntries := []string{}
+	for _, entry := range data {
+		tokens := strings.Split(entry.Value, "/")
+		key := tokens[len(tokens)]
+		allEntries = append(allEntries, key)
+	}
+
+	return allEntries, nil
+}
+
 func (c *Consul) ApplyObject(object interface{}) error {
 	var (
 		err error
@@ -200,17 +216,16 @@ func (c *Consul) GetAllObjects(objType, path string) ([]interface{}, error) {
 		err      error
 	)
 
-	/*
-		if diritems, err = c.Ls(path); err != nil {
-			err = errors.New("GetAllObjects: ec.Ls() failed: " + err.Error())
-			return nil, err
-		}
-	*/
+
+	if diritems, err = c.Ls(path); err != nil {
+		err = errors.New("GetAllObjects: c.Ls() failed: " + err.Error())
+		return nil, err
+	}
 
 	for _, name = range diritems {
 		object, err := c.GetObject(objType, name)
 		if err != nil {
-			err = errors.New("GetAllObjects: ec.GetObject() failed: " + err.Error())
+			err = errors.New("GetAllObjects: c.GetObject() failed: " + err.Error())
 			return nil, err
 		}
 
